@@ -1,26 +1,36 @@
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../config/config');
+
+const JWT_SECRET = "USER_APP";
 
 const authMiddleware = (req, res, next) => {
-    const authHeader = req.headers.authorization;
+    let authHeader = req.headers.authorization;
+
+    console.log("RAW HEADER:", authHeader); // 🔍 debug
 
     if (!authHeader) {
-        return res.status(401).json({ 
-            success: false,
-            message: "No token, authorization denied" 
-        });
+        return res.status(401).json({ message: "No token provided" });
     }
 
+    let token;
+
+    // 🔥 safer extraction
+    if (authHeader.startsWith("Bearer ")) {
+        token = authHeader.slice(7); // better than split
+    } else {
+        token = authHeader;
+    }
+
+    token = token.trim(); // 🔥 VERY IMPORTANT
+
+    console.log("TOKEN USED:", token); // 🔍 debug
+
     try {
-        const token = authHeader.split(' ')[1] || authHeader;
         const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
         next();
     } catch (error) {
-        res.status(401).json({ 
-            success: false,
-            message: "Token is not valid" 
-        });
+        console.log("VERIFY ERROR:", error.message); // 🔍 debug
+        res.status(401).json({ message: "Invalid token" });
     }
 };
 

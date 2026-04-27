@@ -3,9 +3,9 @@ const connectDB = require('./config/db');
 
 const PORT = 3000;
 
-// Connect to Database
-connectDB();
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// Connect to Database first, then start server
+connectDB().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
 });
